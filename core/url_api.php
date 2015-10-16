@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,14 +15,12 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * URL API
- *
- * Provides means for simplifying remote URL operations.
+ * API for simplifying remote URL operations
  *
  * @package CoreAPI
  * @subpackage URLAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
  */
 
@@ -30,10 +28,11 @@
  * Retrieve the contents of a remote URL.
  * First tries using built-in PHP modules (OpenSSL and cURL), then attempts
  * system call as last resort.
- * @param string $p_url The URL to fetch.
+ * @param string URL
  * @return null|string URL contents (NULL in case of errors)
  */
 function url_get( $p_url ) {
+
 	# Generic PHP call
 	if( ini_get_bool( 'allow_url_fopen' ) ) {
 		$t_data = @file_get_contents( $p_url );

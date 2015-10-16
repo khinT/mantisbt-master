@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,15 +15,12 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * JSON API
- *
+ * API for simplifying some JSON interactions.
  * @package CoreAPI
  * @subpackage JSONAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
- *
- * @uses url_api.php
  */
 
 /**
@@ -35,13 +32,13 @@ require_once( 'lang_api.php' );
 
 /**
  * Get a chunk of JSON from a given URL.
- * @param string $p_url    URL.
- * @param string $p_member Optional top-level member to retrieve.
- * @return mixed JSON class structure, false in case of non-existent member
+ * @param string URL
+ * @param string Optional top-level member to retrieve
+ * @return multi JSON class structure, false in case of non-existent member
  */
 function json_url( $p_url, $p_member = null ) {
 	$t_data = url_get( $p_url );
-	$t_json = json_decode( utf8_encode( $t_data ) );
+	$t_json = json_decode( utf8_encode($t_data) );
 
 	if( is_null( $p_member ) ) {
 		return $t_json;
@@ -54,16 +51,10 @@ function json_url( $p_url, $p_member = null ) {
 
 /**
  * JSON error handler
- *
- * Ensures that all necessary headers are set and terminates processing after being invoked.
- * @param integer $p_type    Contains the level of the error raised, as an integer.
- * @param string  $p_error   Contains the error message, as a string.
- * @param string  $p_file    Contains the filename that the error was raised in, as a string.
- * @param integer $p_line    Contains the line number the error was raised at, as an integer.
- * @param array   $p_context The active symbol table at the point the error occurred (optional).
- * @return void
+ * 
+ * <p>Ensures that all necessary headers are set and terminates processing after being invoked.</p>
  */
-function json_error_handler( $p_type, $p_error, $p_file, $p_line, array $p_context ) {
+function json_error_handler( $p_type, $p_error, $p_file, $p_line, $p_context ) {
 	# flush any language overrides to return to user's natural default
 	if( function_exists( 'db_is_connected' ) ) {
 		if( db_is_connected() ) {
@@ -71,8 +62,8 @@ function json_error_handler( $p_type, $p_error, $p_file, $p_line, array $p_conte
 		}
 	}
 
-	$t_error_code = ERROR_GENERIC; # default
-
+	$t_error_code = ERROR_GENERIC; // default
+	
 	# build an appropriate error string
 	switch( $p_type ) {
 		case E_WARNING:
@@ -84,12 +75,12 @@ function json_error_handler( $p_type, $p_error, $p_file, $p_line, array $p_conte
 			$t_error_description = $p_error;
 			break;
 		case E_USER_ERROR:
-			$t_error_type = 'APPLICATION ERROR #' . $p_error;
+			$t_error_type = "APPLICATION ERROR #$p_error";
 			$t_error_code = $p_error;
 			$t_error_description = error_string( $p_error );
 			break;
 		case E_USER_WARNING:
-			$t_error_type = 'APPLICATION WARNING #' . $p_error;
+			$t_error_type = "APPLICATION WARNING #$p_error";
 			$t_error_code = $p_error;
 			$t_error_description = error_string( $p_error );
 			break;
@@ -104,37 +95,33 @@ function json_error_handler( $p_type, $p_error, $p_file, $p_line, array $p_conte
 			$t_error_description = $p_error;
 	}
 
-	json_output_raw( array(
+	json_output_raw(array(
 		'status' => 'ERROR',
 		'error' => array(
 			'code' => $t_error_code,
 			'type' => $t_error_type,
 			'message' => $t_error_description
 		),
-		'contents' => $t_error_description
-	) );
+		'contents' => $t_error_description 
+	));
 }
 /**
  * Outputs the specified contents inside a json response with OK status
- *
+ * 
  * <p>Ensures that all necessary headers are set and terminates processing.</p>
- * @param string $p_contents The contents to encode.
- * @return void
+ * @param string $contents The contents to encode
  */
-function json_output_response ( $p_contents = '' ) {
-	json_output_raw( array(
+ function json_output_response ( $contents = '') {
+	
+ 	json_output_raw( array(
 		'status' => 'OK',
-		'contents' => $p_contents
+		'contents' => $contents	
 	) );
 }
 
-/**
- * output json data
- * @param mixed $p_contents Raw data to json encode.
- * @return void
- */
-function json_output_raw( $p_contents ) {
-	header( 'Content-Type: application/json' );
-	echo json_encode( $p_contents );
+function json_output_raw( $contents ) {
+	
+	header('Content-Type: application/json');
+	echo json_encode( $contents );
 	exit();
 }

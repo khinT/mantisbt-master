@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,28 +15,16 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Wiki API
- *
  * @package CoreAPI
  * @subpackage WikiAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
- *
- * @uses config_api.php
- * @uses constant_inc.php
- * @uses event_api.php
- * @uses plugin_api.php
  */
-
-require_api( 'config_api.php' );
-require_api( 'constant_inc.php' );
-require_api( 'event_api.php' );
-require_api( 'plugin_api.php' );
 
 /**
  * Returns whether wiki functionality is enabled
- * @return boolean indicating whether wiki is enabled
+ * @return bool indicating whether wiki is enabled
  * @access public
  */
 function wiki_enabled() {
@@ -44,57 +32,42 @@ function wiki_enabled() {
 }
 
 /**
- * Initialise wiki engine
- * @return void
+ *
+ * @return null
  * @access public
  */
 function wiki_init() {
-	if( !wiki_enabled() ) {
-		return;
-	}
+	if( wiki_enabled() ) {
 
-	$t_wiki_engine = config_get_global( 'wiki_engine' );
+		# handle legacy style wiki integration
+		require_once( config_get_global( 'class_path' ) . 'MantisCoreWikiPlugin.class.php' );
+		switch( config_get_global( 'wiki_engine' ) ) {
+			case 'dokuwiki':
+				plugin_child( 'MantisCoreDokuwiki' );
+				break;
+			case 'mediawiki':
+				plugin_child( 'MantisCoreMediaWiki' );
+				break;
+			case 'twiki':
+				plugin_child( 'MantisCoreTwiki' );
+				break;
+			case 'WikkaWiki':
+				plugin_child( 'MantisCoreWikkaWiki' );
+				break;
+			case 'xwiki':
+				plugin_child( 'MantisCoreXwiki' );
+				break;
+		}
 
-	if( is_blank( config_get_global( 'wiki_engine_url' ) ) ) {
-		# Build default Wiki URL root based on MantisBT path
-		$t_url = parse_url( config_get_global( 'path' ) );
-
-		# Remove unwanted components and set path to Wiki engine name
-		unset( $t_url['query'], $t_url['fragment'] );
-		$t_url['path'] = '/' . $t_wiki_engine . '/';
-
-		$t_url = http_build_url( $t_url );
-		config_set_global( 'wiki_engine_url', $t_url );
-	}
-
-	# handle legacy style wiki integration
-	require_once( config_get_global( 'class_path' ) . 'MantisCoreWikiPlugin.class.php' );
-	switch( $t_wiki_engine ) {
-		case 'dokuwiki':
-			plugin_child( 'MantisCoreDokuwiki' );
-			break;
-		case 'mediawiki':
-			plugin_child( 'MantisCoreMediaWiki' );
-			break;
-		case 'twiki':
-			plugin_child( 'MantisCoreTwiki' );
-			break;
-		case 'WikkaWiki':
-			plugin_child( 'MantisCoreWikkaWiki' );
-			break;
-		case 'xwiki':
-			plugin_child( 'MantisCoreXwiki' );
-			break;
-	}
-
-	if( is_null( event_signal( 'EVENT_WIKI_INIT' ) ) ) {
-		config_set_global( 'wiki_enable', OFF );
+		if( is_null( event_signal( 'EVENT_WIKI_INIT' ) ) ) {
+			config_set_global( 'wiki_enable', OFF );
+		}
 	}
 }
 
 /**
- * Generate wiki link to a bug
- * @param integer $p_bug_id A valid bug identifier.
+ *
+ * @param int $p_bug_id Bug ID
  * @return string url
  * @access public
  */
@@ -103,8 +76,8 @@ function wiki_link_bug( $p_bug_id ) {
 }
 
 /**
- * Generate wiki link to a project
- * @param integer $p_project_id A valid project identifier.
+ *
+ * @param int $p_project_id
  * @return string url
  * @access public
  */

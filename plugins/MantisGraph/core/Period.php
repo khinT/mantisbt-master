@@ -1,22 +1,18 @@
 <?php
-/**
- * MantisBT - A PHP based bugtracking system
- *
- * MantisBT is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * MantisBT is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
- */
+# MantisBT - a php based bugtracking system
+
+# MantisBT is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# MantisBT is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Class for actions dealing with date periods
@@ -29,151 +25,141 @@
  * @link http://www.mantisbt.org
  * @package MantisBT
  * @subpackage classes
+ *
  */
 class Period {
-	/**
-	 * start date
-	 * @var string
-	 */
-	private $start = '';
 
 	/**
-	 * end date
-	 * @var string
-	 */
-	private $end = '';
+	* @var string start date
+	*/
+	var $start = '';
 
 	/**
-	 * Constructor
-	 */
+	* @var string end date
+	*/
+	var $end = '';
+
+	// ******* End vars *********************************************
+	/**
+	* Constructor
+	*/
 	function Period() {
 		$this->start = '';
 
-		# default to today
+		// default to today
 		$this->end = '';
 
-		# default to today
+		// default to today
 	}
 
 	/**
-	 * set dates for a week
-	 *
-	 * @param string  $p_when  Date string to expand to a week (Sun to Sat).
-	 * @param integer $p_weeks Number of weeks.
-	 * @return void
-	 */
+	* set dates for a week
+	*
+	* @param string $p_when date string to expand to a week (Sun to Sat)
+	* @param int $p_weeks number of weeks
+	*/
 	function a_week( $p_when, $p_weeks = 1 ) {
-		list( $t_year, $t_month, $t_day ) = explode( '-', $p_when );
+		list( $t_year, $t_month, $t_day ) = explode( "-", $p_when );
 		$t_now = getdate( mktime( 0, 0, 0, $t_month, $t_day, $t_year ) );
-		$this->end = strftime( '%Y-%m-%d 23:59:59', mktime( 0, 0, 0, $t_month, $t_day - $t_now['wday'] + ( $p_weeks * 7 ) - 1, $t_year ) );
-		$this->start = strftime( '%Y-%m-%d 00:00:00', mktime( 0, 0, 0, $t_month, $t_day - $t_now['wday'], $t_year ) );
+		$this->end = strftime( "%Y-%m-%d 23:59:59", mktime( 0, 0, 0, $t_month, $t_day - $t_now['wday'] + ( $p_weeks * 7 ) - 1, $t_year ) );
+		$this->start = strftime( "%Y-%m-%d 00:00:00", mktime( 0, 0, 0, $t_month, $t_day - $t_now['wday'], $t_year ) );
 	}
 
 	/**
-	 * set dates for this week
-	 * @return void
-	 */
+	* set dates for this week
+	*
+	*/
 	function this_week() {
 		$this->a_week( date( 'Y-m-d' ) );
 	}
 
 	/**
-	 * set dates for last week
-	 *
-	 * @param integer $p_weeks Number of weeks.
-	 * @return void
-	 */
+	* set dates for last week
+	*
+	* @param int $p_weeks number of weeks
+	*/
 	function last_week( $p_weeks = 1 ) {
 		$this->a_week( date( 'Y-m-d', strtotime( '-' . $p_weeks . ' week' ) ), $p_weeks );
 	}
 
 	/**
-	 * set dates for this week to date
-	 *
-	 * @return void
-	 */
+	* set dates for this week to date
+	*
+	*/
 	function week_to_date() {
 		$this->this_week();
 		$this->end = date( 'Y-m-d' ) . ' 23:59:59';
 	}
 
 	/**
-	 * set dates for a month
-	 *
-	 * @param string $p_when Date string to expand to a month.
-	 * @return void
-	 */
+	* set dates for a month
+	*
+	* @param string $p_when date string to expand to a month
+	*/
 	function a_month( $p_when ) {
-		list( $t_year, $t_month, $t_day ) = explode( '-', $p_when );
+		list( $t_year, $t_month, $t_day ) = explode( "-", $p_when );
 		$this->end = strftime( '%Y-%m-%d 23:59:59', mktime( 0, 0, 0, $t_month + 1, 0, $t_year ) );
 		$this->start = strftime( '%Y-%m-%d 00:00:00', mktime( 0, 0, 0, $t_month, 1, $t_year ) );
 	}
 
 	/**
- 	 * set dates for this month
- 	 *
-	 * @return void
-	 */
+	* set dates for this month
+	*
+	*/
 	function this_month() {
 		$this->a_month( date( 'Y-m-d' ) );
 	}
 
 	/**
-	 * set dates for last month
-	 *
-	 * @return void
-	 */
+	* set dates for last month
+	*
+	*/
 	function last_month() {
 		$this->a_month( date( 'Y-m-d', strtotime( '-1 month' ) ) );
 	}
 
 	/**
-	 * set dates for this month to date
-	 *
-	 * @return void
-	 */
+	* set dates for this month to date
+	*
+	*/
 	function month_to_date() {
 		$this->end = date( 'Y-m-d' ) . ' 23:59:59';
-		list( $t_year, $t_month, $t_day ) = explode( '-', $this->end );
+		list( $t_year, $t_month, $t_day ) = explode( "-", $this->end );
 		$this->start = strftime( '%Y-%m-%d 00:00:00', mktime( 0, 0, 0, $t_month, 1, $t_year ) );
 	}
 
 	/**
-	 * set dates for a quarter
-	 *
-	 * @param string $p_when Date string to expand to a quarter.
-	 * @return void
-	 */
+	* set dates for a quarter
+	*
+	* @param string $p_when date string to expand to a quarter
+	*/
 	function a_quarter( $p_when ) {
-		list( $t_year, $t_month, $t_day ) = explode( '-', $p_when );
+		list( $t_year, $t_month, $t_day ) = explode( "-", $p_when );
 		$t_month = ( (int)(( $t_month - 1 ) / 3 ) * 3 ) + 1;
 		$this->end = strftime( '%Y-%m-%d 23:59:59', mktime( 0, 0, 0, $t_month + 3, 0, $t_year ) );
 		$this->start = strftime( '%Y-%m-%d 00:00:00', mktime( 0, 0, 0, $t_month, 1, $t_year ) );
 	}
 
 	/**
-	 * set dates for this quarter
-	 *
-	 * @return void
-	 */
+	* set dates for this quarter
+	*
+	*/
 	function this_quarter() {
 		$this->a_quarter( date( 'Y-m-d' ) );
 	}
 
 	/**
-	 * set dates for last month
-	 *
-	 * @return void
-	 */
+	* set dates for last month
+	*
+	*/
 	function last_quarter() {
 		$this->a_quarter( date( 'Y-m-d', strtotime( '-3 months' ) ) );
 	}
 
 	/**
-	 * set dates for this quarter to date
-	 *
-	 * @return void
-	 */
+	* set dates for this quarter to date
+	*
+	*/
 	function quarter_to_date() {
 		$this->end = date( 'Y-m-d' ) . ' 23:59:59';
 		list( $t_year, $t_month, $t_day ) = explode( '-', $this->end );
@@ -182,11 +168,10 @@ class Period {
 	}
 
 	/**
-	 * set dates for a year
-	 *
-	 * @param string $p_when Date string to expand to a year.
-	 * @return void
-	 */
+	* set dates for a year
+	*
+	* @param string $p_when date string to expand to a year
+	*/
 	function a_year( $p_when ) {
 		list( $t_year, $t_month, $t_day ) = explode( '-', $p_when );
 		$this->end = strftime( '%Y-%m-%d 23:59:59', mktime( 0, 0, 0, 12, 31, $t_year ) );
@@ -194,84 +179,76 @@ class Period {
 	}
 
 	/**
-	 * set dates for this year
-	 *
-	 * @return void
-	 */
+	* set dates for this year
+	*
+	*/
 	function this_year() {
 		$this->a_year( date( 'Y-m-d' ) );
 	}
 
 	/**
-	 * set dates for current year, ending today
-	 *
-	 * @return void
-	 */
+	* set dates for current year, ending today
+	*
+	*/
 	function year_to_date() {
 		$this->end = date( 'Y-m-d' ) . ' 23:59:59';
-		list( $t_year, $t_month, $t_day ) = explode( '-', $this->end );
+		list( $t_year, $t_month, $t_day ) = explode( "-", $this->end );
 		$this->start = strftime( '%Y-%m-%d 00:00:00', mktime( 0, 0, 0, 1, 1, $t_year ) );
 	}
 
 	/**
-	 * set dates for last year
-	 *
-	 * @return void
-	 */
+	* set dates for last year
+	*
+	*/
 	function last_year() {
 		$this->a_year( date( 'Y-m-d', strtotime( '-1 year' ) ) );
 	}
 
 	/**
-	 * get start date in unix timestamp format
-	 *
-	 * @return integer
-	 */
+	* get start date in unix timestamp format
+	*
+	*/
 	function get_start_timestamp() {
 		return strtotime( $this->start );
 	}
 
 	/**
-	 * get end date in unix timestamp format
-	 *
-	 * @return integer
-	 */
+	* get end date in unix timestamp format
+	*
+	*/
 	function get_end_timestamp() {
 		return strtotime( $this->end );
 	}
 
 	/**
-	 * get formatted start date
-	 *
-	 * @return string
-	 */
+	* get formatted start date
+	*
+	*/
 	function get_start_formatted() {
 		return( $this->start == '' ? '' : strftime( '%Y-%m-%d', $this->get_start_timestamp() ) );
 	}
 
 	/**
-	 * get formatted end date
-	 *
-	 * @return string
-	 */
+	* get formatted end date
+	*
+	*/
 	function get_end_formatted() {
 		return( $this->end == '' ? '' : strftime( '%Y-%m-%d', $this->get_end_timestamp() ) );
 	}
 
 	/**
-	 * get number of days in interval
-     * @return integer
-	 */
+	* get number of days in interval
+	*
+	*/
 	function get_elapsed_days() {
 		return( $this->get_end_timestamp() - $this->get_start_timestamp() ) / ( 24 * 60 * 60 );
 	}
 
 	/**
-	 * print a period selector
-	 *
-	 * @param string $p_control_name Value representing the name of the html control on the web page.
-     * @return string
-	 */
+	* print a period selector
+	*
+	* @param string $p_control_name
+	*/
 	function period_selector( $p_control_name ) {
 		$t_periods = array(
 			0 => plugin_lang_get( 'period_none' ),
@@ -290,23 +267,28 @@ class Period {
 		$t_formatted_start = $this->get_start_formatted();
 		$t_formatted_end = $this->get_end_formatted();
 		$t_ret = '<div id="period_menu">';
-		$t_ret .= get_dropdown( $t_periods, $p_control_name, $t_default, false, false );
-		$t_ret .= "</div>\n";
-		$t_ret .= "<div id=\"dates\">\n";
-		$t_ret .= '<label for="start_date">' . lang_get( 'from_date' ) . '</label><input type="text" id="start_date" name="start_date" size="20" value="' . $t_formatted_start . '" class="datetime" disabled="disabled" />' . "<br />\n";
-		$t_ret .= '<label for="end_date">' . lang_get( 'to_date' ) . '</label><input type="text" id="end_date" name="end_date" size="20" value="' . $t_formatted_end . '" class="datetime" disabled="disabled" />' . "\n";
-		$t_ret .= "</div>\n";
+		$t_ret .= get_dropdown( $t_periods, $p_control_name, $t_default, false, false, 'setDisplay(\'dates\', document.getElementById(\'' . $p_control_name . '\').value == 10)' );
+		$t_ret .= '</div><div id="dates">' . lang_get( 'from_date' ) . '&#160;' . '<input type="text" id="start_date" name="start_date" size="10" value="' . $t_formatted_start . '" />' . '<img src="images/calendar-img.gif" id="f_trigger_s" style="cursor: pointer; border: 1px solid red;" ' . ' title="Date selector" alt="Date" onmouseover="this.style.background=\'red\';"' . ' onmouseout="this.style.background=\'white\'" />' . "\n" . '<br />' . lang_get( 'to_date' ) . '&#160;&#160;&#160;&#160;' . '<input type="text" id="end_date" name="end_date" size="10" value="' . $t_formatted_end . '" />' . '<img src="images/calendar-img.gif" id="f_trigger_e" style="cursor: pointer; border: 1px solid red;" ' . ' alt="Date" title="Date selector" onmouseover="this.style.background=\'red\';"' . ' onmouseout="this.style.background=\'white\'" />' . "\n" . '<script type="text/javascript">
+			<!--
+			Calendar.setup({ inputField : "start_date", ifFormat : "%Y-%m-%d", button : "f_trigger_s",
+			    align : "cR", singleClick : false,  showTime : false });
+    		Calendar.setup({ inputField : "end_date", ifFormat : "%Y-%m-%d", button : "f_trigger_e",
+    			    align : "cR", singleClick : false,  showTime : false });
+    		var t = document.getElementById(\'' . $p_control_name . '\').value;
+    		setDisplay(\'' . $p_control_name . '\',true);
+    		setDisplay(\'dates\', document.getElementById(\'' . $p_control_name . '\').value == 10);
+    			//-->
+    		</script>' . "\n" . '</div>';
 		return $t_ret;
 	}
 
 	/**
-	 * set date based on period selector
-	 *
-	 * @param string $p_control_name Value representing the name of the html control on the web page.
-	 * @param string $p_start_field  Name representing the name of the starting field on the date selector i.e. start_date.
-	 * @param string $p_end_field    Name representing the name of the ending field on the date selector i.e. end_date.
-	 * @return void
-	 */
+	* set date based on period selector
+	*
+	* @param string $p_control_name
+	* @param string $p_start_field
+	* @param string $p_end_field
+	*/
 	function set_period_from_selector( $p_control_name, $p_start_field = 'start_date', $p_end_field = 'end_date' ) {
 		$t_default = gpc_get_int( $p_control_name, 0 );
 		switch( $t_default ) {

@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,50 +15,26 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Bug Group Action API
- *
- * @package CoreAPI
- * @subpackage BugGroupActionAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
- *
- * @uses bug_api.php
- * @uses config_api.php
- * @uses constant_inc.php
- * @uses helper_api.php
- * @uses html_api.php
- * @uses lang_api.php
- * @uses string_api.php
+ *	@package CoreAPI
+ *	@subpackage BugGroupActionAPI
  */
-
-require_api( 'bug_api.php' );
-require_api( 'config_api.php' );
-require_api( 'constant_inc.php' );
-require_api( 'helper_api.php' );
-require_api( 'html_api.php' );
-require_api( 'lang_api.php' );
-require_api( 'string_api.php' );
-
-require_css( 'status_config.php' );
 
 /**
  * Initialise bug action group api
- * @param string $p_action Custom action to run.
- * @return void
  */
 function bug_group_action_init( $p_action ) {
 	$t_valid_actions = bug_group_action_get_commands( current_user_get_accessible_projects() );
 	$t_action = strtoupper( $p_action );
 
-	if( !isset( $t_valid_actions[$t_action] ) &&
-		!isset( $t_valid_actions['EXT_' . $t_action] )
-		) {
+	if ( !isset( $t_valid_actions[$t_action] ) && !isset ( $t_valid_actions['EXT_' . $t_action] ) ) {
 		trigger_error( ERROR_GENERIC, ERROR );
 	}
 
 	$t_include_file = config_get_global( 'absolute_path' ) . 'bug_actiongroup_' . $p_action . '_inc.php';
-	if( !file_exists( $t_include_file ) ) {
+	if ( !file_exists( $t_include_file ) ) {
 		trigger_error( ERROR_GENERIC, ERROR );
 	} else {
 		require_once( $t_include_file );
@@ -67,7 +43,6 @@ function bug_group_action_init( $p_action ) {
 
 /**
  * Print the top part for the bug action group page.
- * @return void
  */
 function bug_group_action_print_top() {
 	html_page_top();
@@ -75,7 +50,6 @@ function bug_group_action_print_top() {
 
 /**
  * Print the bottom part for the bug action group page.
- * @return void
  */
 function bug_group_action_print_bottom() {
 	html_page_bottom();
@@ -84,43 +58,51 @@ function bug_group_action_print_bottom() {
 /**
  * Print the list of selected issues and the legend for the status colors.
  *
- * @param array $p_bug_ids_array An array of issue ids.
- * @return void
+ * @param $p_bug_ids_array   An array of issue ids.
  */
-function bug_group_action_print_bug_list( array $p_bug_ids_array ) {
-	html_status_legend( STATUS_LEGEND_POSITION_TOP );
+function bug_group_action_print_bug_list( $p_bug_ids_array ) {
+	$t_legend_position = config_get( 'status_legend_position' );
 
-	echo '<div id="action-group-issues-div">';
-	echo '<table>';
+	if( STATUS_LEGEND_POSITION_TOP == $t_legend_position ) {
+		html_status_legend();
+		echo '<br />';
+	}
+
+	echo '<div align="center">';
+	echo '<table class="width75" cellspacing="1">';
 	echo '<tr class="row-1">';
-	echo '<th class="category" colspan="2">';
+	echo '<td class="category" colspan="2">';
 	echo lang_get( 'actiongroup_bugs' );
-	echo '</th>';
+	echo '</td>';
 	echo '</tr>';
 
 	$t_i = 1;
 
 	foreach( $p_bug_ids_array as $t_bug_id ) {
-		# choose color based on status
-		$t_status_label = html_get_status_css_class( bug_get_field( $t_bug_id, 'status' ), auth_get_current_user_id(), bug_get_field( $t_bug_id, 'project_id' ) );
-
-		echo sprintf( "<tr class=\"%s\"> <td>%s</td> <td>%s</td> </tr>\n", $t_status_label, string_get_bug_view_link( $t_bug_id ), string_attribute( bug_get_field( $t_bug_id, 'summary' ) ) );
+		$t_class = sprintf( "row-%d", ( $t_i++ % 2 ) + 1 );
+		echo sprintf( "<tr bgcolor=\"%s\"> <td>%s</td> <td>%s</td> </tr>\n",
+			get_status_color( bug_get_field( $t_bug_id, 'status' ), auth_get_current_user_id(), bug_get_field( $t_bug_id, 'project_id' ) ),
+			string_get_bug_view_link( $t_bug_id ),
+			string_attribute( bug_get_field( $t_bug_id, 'summary' ) ) );
 	}
 
 	echo '</table>';
+	echo '</form>';
 	echo '</div>';
 
-	html_status_legend( STATUS_LEGEND_POSITION_BOTTOM );
+	if( STATUS_LEGEND_POSITION_BOTTOM == $t_legend_position ) {
+		echo '<br />';
+		html_status_legend();
+	}
 }
 
 /**
  * Print the array of issue ids via hidden fields in the form to be passed on to
  * the bug action group action page.
  *
- * @param array $p_bug_ids_array An array of issue ids.
- * @return void
+ * @param $p_bug_ids_array   An array of issue ids.
  */
-function bug_group_action_print_hidden_fields( array $p_bug_ids_array ) {
+function bug_group_action_print_hidden_fields( $p_bug_ids_array ) {
 	foreach( $p_bug_ids_array as $t_bug_id ) {
 		echo '<input type="hidden" name="bug_arr[]" value="' . $t_bug_id . '" />' . "\n";
 	}
@@ -131,8 +113,7 @@ function bug_group_action_print_hidden_fields( array $p_bug_ids_array ) {
  * and the submit button.  This ends up calling action_<action>_print_fields()
  * from bug_actiongroup_<action>_inc.php
  *
- * @param string $p_action The custom action name without the "EXT_" prefix.
- * @return void
+ * @param $p_action   The custom action name without the "EXT_" prefix.
  */
 function bug_group_action_print_action_fields( $p_action ) {
 	$t_function_name = 'action_' . $p_action . '_print_fields';
@@ -143,8 +124,7 @@ function bug_group_action_print_action_fields( $p_action ) {
  * Prints some title text for the custom action page.  This ends up calling
  * action_<action>_print_title() from bug_actiongroup_<action>_inc.php
  *
- * @param string $p_action The custom action name without the "EXT_" prefix.
- * @return void
+ * @param $p_action   The custom action name without the "EXT_" prefix.
  */
 function bug_group_action_print_title( $p_action ) {
 	$t_function_name = 'action_' . $p_action . '_print_title';
@@ -155,23 +135,24 @@ function bug_group_action_print_title( $p_action ) {
  * Validates the combination of an action and a bug.  This ends up calling
  * action_<action>_validate() from bug_actiongroup_<action>_inc.php
  *
- * @param string  $p_action The custom action name without the "EXT_" prefix.
- * @param integer $p_bug_id The id of the bug to validate the action on.
+ * @param $p_action   The custom action name without the "EXT_" prefix.
+ * @param $p_bug_id   The id of the bug to validate the action on.
  *
- * @return boolean|array true if action can be applied or array of ( bug_id => reason for failure to validate )
+ * @returns true|array true if action can be applied or array of ( bug_id => reason for failure to validate )
  */
 function bug_group_action_validate( $p_action, $p_bug_id ) {
 	$t_function_name = 'action_' . $p_action . '_validate';
 	return $t_function_name( $p_bug_id );
 }
 
+
 /**
  * Executes an action on a bug.  This ends up calling
  * action_<action>_process() from bug_actiongroup_<action>_inc.php
  *
- * @param string  $p_action The custom action name without the "EXT_" prefix.
- * @param integer $p_bug_id The id of the bug to validate the action on.
- * @return boolean|array Action can be applied., ( bug_id => reason for failure to process )
+ * @param $p_action   The custom action name without the "EXT_" prefix.
+ * @param $p_bug_id   The id of the bug to validate the action on.
+ * @returns true|array Action can be applied., ( bug_id => reason for failure to process )
  */
 function bug_group_action_process( $p_action, $p_bug_id ) {
 	$t_function_name = 'action_' . $p_action . '_process';
@@ -181,11 +162,11 @@ function bug_group_action_process( $p_action, $p_bug_id ) {
 /**
  * Get a list of bug group actions available to the current user for one or
  * more projects.
- * @param array $p_project_ids An array containing one or more project IDs.
- * @return array
+ * @param array $p_projects An array containing one or more project IDs
+ * @return null
  */
-function bug_group_action_get_commands( array $p_project_ids = null ) {
-	if( $p_project_ids === null || count( $p_project_ids ) == 0 ) {
+function bug_group_action_get_commands( $p_project_ids = null ) {
+	if ( $p_project_ids === null || count( $p_project_ids ) == 0 ) {
 		$p_project_ids = array( ALL_PROJECTS );
 	}
 
@@ -215,6 +196,7 @@ function bug_group_action_get_commands( array $p_project_ids = null ) {
 		if( !isset( $t_commands['CLOSE'] ) &&
 			access_has_project_level( config_get( 'update_bug_status_threshold', null, null, $t_project_id ), $t_project_id ) &&
 			( access_has_project_level( access_get_status_threshold( config_get( 'bug_closed_status_threshold', null, null, $t_project_id ), $t_project_id ), $t_project_id ) ||
+				access_has_project_level( config_get( 'report_bug_threshold', null, null, $t_project_id ), $t_project_id ) &&
 				access_has_project_level( config_get( 'allow_reporter_close', null, null, $t_project_id ), $t_project_id ) ) ) {
 			$t_commands['CLOSE'] = lang_get( 'actiongroup_menu_close' );
 		}
@@ -274,12 +256,6 @@ function bug_group_action_get_commands( array $p_project_ids = null ) {
 		if( !isset( $t_commands['EXT_ATTACH_TAGS'] ) &&
 			access_has_project_level( config_get( 'tag_attach_threshold', null, null, $t_project_id ), $t_project_id ) ) {
 			$t_commands['EXT_ATTACH_TAGS'] = lang_get( 'actiongroup_menu_attach_tags' );
-		}
-
-		if( !isset( $t_commands['UP_PRODUCT_VERSION'] ) &&
-			version_should_show_product_version( $t_project_id ) &&
-			access_has_project_level( config_get( 'update_bug_threshold', null, null, $t_project_id ), $t_project_id ) ) {
-			$t_commands['UP_PRODUCT_VERSION'] = lang_get( 'actiongroup_menu_update_product_version' );
 		}
 
 		if( !isset( $t_commands['UP_FIXED_IN_VERSION'] ) &&

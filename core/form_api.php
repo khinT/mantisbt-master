@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,32 +15,18 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Form API
- *
- * Handles form security and validation. Security methods are targeted to
- * work with both GET and POST form types and should allow multiple
- * simultaneous edits of the form to be submitted out-of-order.
+ * Form API for handling tasks necessary to form security and validation.
+ * Security methods are targetted to work with both GET and POST form types,
+ * and should allow multiple simultaneous edits of the form to be submitted.
  *
  * @package CoreAPI
  * @subpackage FormAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
  *
- * @uses config_api.php
- * @uses constant_inc.php
- * @uses crypto_api.php
- * @uses gpc_api.php
- * @uses php_api.php
  * @uses session_api.php
  */
-
-require_api( 'config_api.php' );
-require_api( 'constant_inc.php' );
-require_api( 'crypto_api.php' );
-require_api( 'gpc_api.php' );
-require_api( 'php_api.php' );
-require_api( 'session_api.php' );
 
 /**
  * Helper function to generate a form action value when forms are designed
@@ -57,11 +43,11 @@ function form_action_self() {
  * Generate a random security token, prefixed by date, store it in the
  * user's session, and then return the string to be used as a form element
  * element with the security token as the value.
- * @param string $p_form_name Form name.
+ * @param string Form name
  * @return string Security token string
  */
 function form_security_token( $p_form_name ) {
-	if( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
+	if ( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
 		return '';
 	}
 
@@ -72,14 +58,13 @@ function form_security_token( $p_form_name ) {
 		$t_tokens[$p_form_name] = array();
 	}
 
-	# Generate a nonce prefixed by date.
-	# With a base64 output encoded nonce length of 32 characters, we are
-	# generating a 192bit nonce.
+	# Generate a random security token prefixed by date.
+	# mt_rand() returns an int between 0 and RAND_MAX as extra entropy
 	$t_date = date( 'Ymd' );
-	$t_string = $t_date . crypto_generate_uri_safe_nonce( 32 );
+	$t_string = $t_date . sha1( time() . mt_rand() );
 
 	# Add the token to the user's session
-	if( !isset( $t_tokens[$p_form_name][$t_date] ) ) {
+	if ( !isset( $t_tokens[$p_form_name][$t_date] ) ) {
 		$t_tokens[$p_form_name][$t_date] = array();
 	}
 
@@ -92,12 +77,12 @@ function form_security_token( $p_form_name ) {
 
 /**
  * Get a hidden form element containing a generated form security token.
- * @param string $p_form_name      Form name.
- * @param string $p_security_token Optional security token, previously generated for the same form.
+ * @param string $p_form_name Form name
+ * @param string $p_security_token Optional security token, previously generated for the same form
  * @return string Hidden form element to output
  */
 function form_security_field( $p_form_name, $p_security_token = null ) {
-	if( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
+	if ( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
 		return '';
 	}
 
@@ -118,11 +103,11 @@ function form_security_field( $p_form_name, $p_security_token = null ) {
 
 /**
  * Get a URL parameter containing a generated form security token.
- * @param string $p_form_name Form name.
+ * @param string Form name
  * @return string Hidden form element to output
  */
 function form_security_param( $p_form_name ) {
-	if( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
+	if ( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
 		return '';
 	}
 
@@ -140,11 +125,11 @@ function form_security_param( $p_form_name ) {
  * Validate the security token for the given form name based on tokens
  * stored in the user's session.  While checking stored tokens, any that
  * are more than 3 days old will be purged.
- * @param string $p_form_name Form name.
+ * @param string Form name
  * @return boolean Form is valid
  */
 function form_security_validate( $p_form_name ) {
-	if( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
+	if ( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
 		return true;
 	}
 
@@ -171,7 +156,7 @@ function form_security_validate( $p_form_name ) {
 	$t_date = utf8_substr( $t_input, 0, 8 );
 
 	# Check if the token exists
-	if( isset( $t_tokens[$p_form_name][$t_date][$t_input] ) ) {
+	if ( isset( $t_tokens[$p_form_name][$t_date][$t_input] ) ) {
 		return true;
 	}
 
@@ -183,11 +168,10 @@ function form_security_validate( $p_form_name ) {
 /**
  * Purge form security tokens that are older than 3 days, or used
  * for form validation.
- * @param string $p_form_name Form name.
- * @return void
+ * @param string Form name
  */
 function form_security_purge( $p_form_name ) {
-	if( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
+	if ( PHP_CLI == php_mode() || OFF == config_get_global( 'form_security_validation' ) ) {
 		return;
 	}
 
@@ -213,7 +197,7 @@ function form_security_purge( $p_form_name ) {
 
 	foreach( $t_tokens as $t_form_name => $t_dates ) {
 		foreach( $t_dates as $t_date => $t_date_tokens ) {
-			if( $t_date < $t_purge_date ) {
+			if ( $t_date < $t_purge_date ) {
 				unset( $t_tokens[$t_form_name][$t_date] );
 			}
 		}

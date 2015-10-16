@@ -1,7 +1,8 @@
 #!/usr/bin/php -q
 <?php
-# MantisBT - A PHP based bugtracking system
-
+# MantisBT - a php based bugtracking system
+# Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+# Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
@@ -16,19 +17,12 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 # See the README and LICENSE files for details
 
-/**
- * Cron Script to send emails from Mantis.
- */
-
-/**
- * Global Bypass http headers
- */
 global $g_bypass_headers;
 $g_bypass_headers = 1;
 
-require_once( dirname( dirname( __FILE__ ) ) . '/core.php' );
+require_once( dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'core.php' );
 
-require_api( 'email_api.php' );
+require_once( 'email_api.php' );
 
 # Make sure this script doesn't run via the webserver
 if( php_sapi_name() != 'cli' ) {

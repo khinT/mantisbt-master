@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,81 +15,49 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Email Queue API
- *
  * @package CoreAPI
  * @subpackage EmailQueueAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
- *
- * @uses constant_api.php
- * @uses database_api.php
- * @uses error_api.php
- * @uses lang_api.php
- * @uses utility_api.php
  */
 
-require_api( 'constant_inc.php' );
-require_api( 'database_api.php' );
-require_api( 'error_api.php' );
-require_api( 'lang_api.php' );
-require_api( 'utility_api.php' );
-
-/**
+ /**
  * EmailData Structure Definition
+ * @package MantisBT
+ * @subpackage classes
  */
 class EmailData {
-	/**
-	 * Email address
-	 */
-	public $email = '';
-
-	/**
-	 * Subject text
-	 */
-	public $subject = '';
-
-	/**
-	 * Body text
-	 */
-	public $body = '';
-
-	/**
-	 * Meta Data array
-	 */
-	public $metadata = array(
+	// properties set during creation
+	var $email = '';
+	var $subject = '';
+	var $body = '';
+	var $metadata = array(
 		'headers' => array(),
 	);
 
-	/**
-	 * Email ID
-	 */
-	public $email_id = 0;
-
-	/**
-	 * Submitted
-	 */
-	public $submitted = '';
+	// auto-populated properties
+	var $email_id = 0;
+	var $submitted = '';
 };
 
 /**
- * Return a copy of the bug structure with all the instvars prepared for database insertion
- * @param EmailData $p_email_data Email Data structure to store.
+ * Return a copy of the bug structure with all the instvars prepared for db insertion
+ * @param EmailData $p_email_data
  * @return EmailData
  */
-function email_queue_prepare_db( EmailData $p_email_data ) {
-	$p_email_data->email_id = (int)$p_email_data->email_id;
+function email_queue_prepare_db( $p_email_data ) {
+	$p_email_data->email_id = db_prepare_int( $p_email_data->email_id );
 
 	return $p_email_data;
 }
 
 /**
  * Add to email queue
- * @param EmailData $p_email_data Email Data structure.
- * @return integer
+ * @param EmailData $p_email_data
+ * @return int
  */
-function email_queue_add( EmailData $p_email_data ) {
+function email_queue_add( $p_email_data ) {
 	$t_email_data = email_queue_prepare_db( $p_email_data );
 
 	# email cannot be blank
@@ -110,27 +78,38 @@ function email_queue_add( EmailData $p_email_data ) {
 		trigger_error( ERROR_EMPTY_FIELD, ERROR );
 	}
 
+	$t_email_table = db_get_table( 'mantis_email_table' );
+
 	$c_email = $t_email_data->email;
 	$c_subject = $t_email_data->subject;
 	$c_body = $t_email_data->body;
 	$c_metadata = serialize( $t_email_data->metadata );
 
-	$t_query = 'INSERT INTO {email}
-				    ( email, subject, body, submitted, metadata)
+	$query = "INSERT INTO $t_email_table
+				    ( email,
+				      subject,
+					  body,
+					  submitted,
+					  metadata)
 				  VALUES
-				    (' . db_param() . ',' . db_param() . ',' . db_param() . ',' . db_param() . ',' . db_param() . ')';
-	db_query( $t_query, array( $c_email, $c_subject, $c_body, db_now(), $c_metadata ) );
-	$t_id = db_insert_id( db_get_table( 'email' ), 'email_id' );
+				    ( " . db_param() . ",
+				      " . db_param() . ",
+				      " . db_param() . ",
+					  " . db_param() . ",
+					  " . db_param() . "
+					)";
+	db_query_bound( $query, Array( $c_email, $c_subject, $c_body, db_now(), $c_metadata ) );
+	$t_id = db_insert_id( $t_email_table, 'email_id' );
 
-	log_event( LOG_EMAIL, 'message #' . $t_id . ' queued' );
+	log_event( LOG_EMAIL, "message #$t_id queued" );
 
 	return $t_id;
 }
 
 /**
  * Convert email db row to EmailData object
- * @param array|false $p_row Database result row to convert.
- * @return boolean|EmailData
+ * @param array $p_row
+ * @return bool|EmailData
  */
 function email_queue_row_to_object( $p_row ) {
 	# typically this function takes as an input the result of db_fetch_array() which can be false.
@@ -150,6 +129,7 @@ function email_queue_row_to_object( $p_row ) {
 	foreach( $t_vars as $t_var => $t_value ) {
 		# If we got a field from the DB with the same name
 		if( in_array( $t_var, $t_row_keys, true ) ) {
+
 			# Store that value in the object
 			$t_email_data->$t_var = $t_row[$t_var];
 		}
@@ -160,40 +140,49 @@ function email_queue_row_to_object( $p_row ) {
 
 /**
  * Get Corresponding EmailData object
- * @param integer $p_email_id An email identifier.
- * @return boolean|EmailData
+ * @param int $p_email_id
+ * @return bool|EmailData
  */
 function email_queue_get( $p_email_id ) {
-	$t_query = 'SELECT * FROM {email} WHERE email_id=' . db_param();
-	$t_result = db_query( $t_query, array( $p_email_id ) );
+	$c_email_id = db_prepare_int( $p_email_id );
+	$t_email_table = db_get_table( 'mantis_email_table' );
 
-	$t_row = db_fetch_array( $t_result );
+	$query = 'SELECT * FROM ' . $t_email_table . ' WHERE email_id=' . db_param();
+	$result = db_query_bound( $query, Array( $c_email_id ) );
+
+	$t_row = db_fetch_array( $result );
 
 	return email_queue_row_to_object( $t_row );
 }
 
 /**
  * Delete entry from email queue
- * @param integer $p_email_id Email queue identifier.
- * @return void
+ * @param int $p_email_id
+ * @return null
  */
 function email_queue_delete( $p_email_id ) {
-	$t_query = 'DELETE FROM {email} WHERE email_id=' . db_param();
-	db_query( $t_query, array( $p_email_id ) );
+	$c_email_id = db_prepare_int( $p_email_id );
+	$t_email_table = db_get_table( 'mantis_email_table' );
 
-	log_event( LOG_EMAIL, 'message #' . $p_email_id . ' deleted from queue' );
+	$query = 'DELETE FROM ' . $t_email_table . ' WHERE email_id=' . db_param();
+	db_query_bound( $query, Array( $c_email_id ) );
+
+	log_event( LOG_EMAIL, "message #$p_email_id deleted from queue" );
 }
 
 /**
  * Get array of email queue id's
+ * @param string $p_sort_order 'ASC' or 'DESC' (defaults to DESC)
  * @return array
  */
-function email_queue_get_ids() {
-	$t_query = 'SELECT email_id FROM {email} ORDER BY email_id ASC';
-	$t_result = db_query( $t_query );
+function email_queue_get_ids( $p_sort_order = 'DESC' ) {
+	$t_email_table = db_get_table( 'mantis_email_table' );
+
+	$query = "SELECT email_id FROM $t_email_table ORDER BY email_id $p_sort_order";
+	$result = db_query_bound( $query );
 
 	$t_ids = array();
-	while( ( $t_row = db_fetch_array( $t_result ) ) !== false ) {
+	while(( $t_row = db_fetch_array( $result ) ) !== false ) {
 		$t_ids[] = $t_row['email_id'];
 	}
 

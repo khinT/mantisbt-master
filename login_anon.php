@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,42 +14,34 @@
 # You should have received a copy of the GNU General Public License
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * login_anon.php logs a user in anonymously without having to enter a username
- * or password.
- *
- * Depends on global configuration variables:
- * anonymous_login - false or name of account to login with.
- *
- * TODO:
- * Check how manage account is impacted.
- * Might be extended to allow redirects for bug links etc.
- *
- * @package MantisBT
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
- * @link http://www.mantisbt.org
- *
- * @uses core.php
- * @uses config_api.php
- * @uses gpc_api.php
- * @uses print_api.php
- * @uses string_api.php
- */
+	/**
+	 * login_anon.php logs a user in anonymously without having to enter a username
+	 * or password.
+	 *
+	 * Depends on two global configuration variables:
+	 * allow_anonymous_login - bool which must be true to allow anonymous login.
+	 * anonymous_account - name of account to login with.
+	 *
+	 * TODO:
+	 * Check how manage account is impacted.
+ 	 * Might be extended to allow redirects for bug links etc.
+ 	 * @package MantisBT
+	 * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+	 * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+	 * @link http://www.mantisbt.org
+	 */
+	 /**
+	  * MantisBT Core API's
+	  */
+	require_once( 'core.php' );
 
-require_once( 'core.php' );
-require_api( 'config_api.php' );
-require_api( 'gpc_api.php' );
-require_api( 'print_api.php' );
-require_api( 'string_api.php' );
+	$f_return = gpc_get_string( 'return', '' );
 
-$f_return = gpc_get_string( 'return', '' );
+	$t_anonymous_account = config_get( 'anonymous_account' );
 
-$t_anonymous_account = config_get( 'anonymous_account' );
-
-if( $f_return !== '' ) {
-	$t_return = string_url( string_sanitize_url( $f_return ) );
-	print_header_redirect( 'login.php?username=' . $t_anonymous_account . '&perm_login=false&return=' . $t_return );
-} else {
-	print_header_redirect( 'login.php?username=' . $t_anonymous_account . '&perm_login=false' );
-}
+	if ( $f_return !== '' ) {
+		$t_return = string_url( string_sanitize_url( $f_return ) );
+		print_header_redirect( "login.php?username=$t_anonymous_account&perm_login=false&return=$t_return" );
+	} else {
+		print_header_redirect( "login.php?username=$t_anonymous_account&perm_login=false" );
+	}

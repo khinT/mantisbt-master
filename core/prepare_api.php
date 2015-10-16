@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,35 +15,20 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Prepare API
- *
- * Handles preparation of strings prior to be printed or stored.
- *
+ * this file handles preparing of strings like to be printed
+ * or stored.  print_api.php will gradually be replaced by
+ * think calls to echo the results of functions implemented here.
  * @package CoreAPI
  * @subpackage PrepareAPI
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+ * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+ * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
  * @link http://www.mantisbt.org
- *
- * @uses access_api.php
- * @uses config_api.php
- * @uses constant_inc.php
- * @uses string_api.php
- * @uses user_api.php
- * @uses version_api.php
  */
-
-require_api( 'access_api.php' );
-require_api( 'config_api.php' );
-require_api( 'constant_inc.php' );
-require_api( 'string_api.php' );
-require_api( 'user_api.php' );
-require_api( 'version_api.php' );
 
 /**
  * return the mailto: href string link
- * @param string $p_email Email address to prepare.
- * @param string $p_text  Display text for the hyperlink.
+ * @param string $p_email
+ * @param string $p_text
  * @return string
  */
 function prepare_email_link( $p_email, $p_text ) {
@@ -62,7 +47,7 @@ function prepare_email_link( $p_email, $p_text ) {
 
 /**
  * prepares the name of the user given the id.  also makes it an email link.
- * @param integer $p_user_id A valid user identifier.
+ * @param int $p_user_id
  * @return string
  */
 function prepare_user_name( $p_user_id ) {
@@ -72,35 +57,54 @@ function prepare_user_name( $p_user_id ) {
 	}
 
 	$t_username = user_get_name( $p_user_id );
-	$t_username = string_display_line( $t_username );
 	if( user_exists( $p_user_id ) && user_get_field( $p_user_id, 'enabled' ) ) {
-		return '<a class="user" href="' . string_sanitize_url( 'view_user_page.php?id=' . $p_user_id, true ) . '">' . $t_username . '</a>';
+		$t_username = string_display_line( $t_username );
+		return '<a href="' . string_sanitize_url( 'view_user_page.php?id=' . $p_user_id, true ) . '">' . $t_username . '</a>';
 	} else {
-		return '<del class="user">' . $t_username . '</del>';
+		$t_result = '<font STYLE="text-decoration: line-through">';
+		$t_result .= string_display_line( $t_username );
+		$t_result .= '</font>';
+		return $t_result;
 	}
 }
+function prepare_realname( $p_user_id ) {
+	# Catch a user_id of NO_USER (like when a handler hasn't been assigned)
+	if( NO_USER == $p_user_id ) {
+		return '';
+	}
 
+	$t_username = user_get_name( $p_user_id );
+	if( user_exists( $p_user_id ) && user_get_field( $p_user_id, 'realname' ) ) {
+		$t_username = string_display_line( $t_realname );
+		return '<a href="' . string_sanitize_url( 'view_user_page.php?id=' . $p_user_id, true ) . '">' . $t_realname . '</a>';
+	} else {
+		$t_result = '<font STYLE="text-decoration: line-through">';
+		$t_result .= string_display_line( $t_realname );
+		$t_result .= '</font>';
+		return $t_result;
+	}
+}
 /**
  * A function that prepares the version string for outputting to the user on view / print issue pages.
  * This function would add the version date, if appropriate.
  *
- * @param integer $p_project_id The project id.
- * @param integer $p_version_id The version id.  If false then this method will return an empty string.
- * @return string The formatted version string.
+ * @param integer $p_project_id  The project id.
+ * @param integer $p_version_id  The version id.  If false then this method will return an empty string.
+ * @return The formatted version string.
  */
 function prepare_version_string( $p_project_id, $p_version_id ) {
-	if( $p_version_id === false ) {
+	if ( $p_version_id === false ) {
 		return '';
 	}
 
-	$t_version_text = version_full_name( $p_version_id, null, $p_project_id );
+	$t_version_text = version_full_name( $p_version_id, /* showProject */ null, $p_project_id );
 
-	if( access_has_project_level( config_get( 'show_version_dates_threshold' ), $p_project_id ) ) {
+	if ( access_has_project_level( config_get( 'show_version_dates_threshold' ), $p_project_id ) ) {
 		$t_short_date_format = config_get( 'short_date_format' );
 
 		$t_version = version_get( $p_version_id );
 		$t_version_text .= ' (' . date( $t_short_date_format, $t_version->date_order ) . ')';
 	}
 
-	return $t_version_text;
+	return $t_version_text;	
 }

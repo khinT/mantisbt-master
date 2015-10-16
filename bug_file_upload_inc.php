@@ -1,5 +1,5 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,40 +14,23 @@
 # You should have received a copy of the GNU General Public License
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * This include file prints out the bug file upload form
- * It POSTs to bug_file_add.php
- *
- * @package MantisBT
- * @copyright Copyright 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
- * @copyright Copyright 2002  MantisBT Team - mantisbt-dev@lists.sourceforge.net
- * @link http://www.mantisbt.org
- *
- * @uses collapse_api.php
- * @uses config_api.php
- * @uses file_api.php
- * @uses form_api.php
- * @uses lang_api.php
- * @uses utility_api.php
- */
+	/**
+	 * This include file prints out the bug file upload form
+	 * It POSTs to bug_file_add.php
+	 * @package MantisBT
+	 * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
+	 * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
+	 * @link http://www.mantisbt.org
+	 */
 
-if( !defined( 'BUG_FILE_UPLOAD_INC_ALLOW' ) ) {
-	return;
-}
+	require_once( 'file_api.php' );
 
-require_api( 'collapse_api.php' );
-require_api( 'config_api.php' );
-require_api( 'file_api.php' );
-require_api( 'form_api.php' );
-require_api( 'lang_api.php' );
-require_api( 'utility_api.php' );
+	# check if we can allow the upload... bail out if we can't
+	if ( !file_allow_bug_upload( $f_bug_id ) ) {
+		return false;
+	}
 
-# check if we can allow the upload... bail out if we can't
-if( !file_allow_bug_upload( $f_bug_id ) ) {
-	return false;
-}
-
-$t_max_file_size = (int)min( ini_get_number( 'upload_max_filesize' ), ini_get_number( 'post_max_size' ), config_get( 'max_file_size' ) );
+	$t_max_file_size = (int)min( ini_get_number( 'upload_max_filesize' ), ini_get_number( 'post_max_size' ), config_get( 'max_file_size' ) );
 ?>
 <br />
 
@@ -69,15 +52,14 @@ $t_max_file_size = (int)min( ini_get_number( 'upload_max_filesize' ), ini_get_nu
 </tr>
 <tr class="row-1">
 	<td class="category" width="15%">
-		<?php echo lang_get( $t_file_upload_max_num == 1 ? 'select_file' : 'select_files' ) ?>
-		<br />
-		<?php print_max_filesize( $t_max_file_size ); ?>
+		<?php echo lang_get( $t_file_upload_max_num == 1 ? 'select_file' : 'select_files' ) ?><br />
+		<?php echo '<span class="small">(' . lang_get( 'max_file_size' ) . ': ' . number_format( $t_max_file_size/1000 ) . 'k)</span>'?>
 	</td>
 	<td width="85%">
 		<input type="hidden" name="bug_id" value="<?php echo $f_bug_id ?>" />
 		<input type="hidden" name="max_file_size" value="<?php echo $t_max_file_size ?>" />
 <?php
-	# Display multiple file upload fields
+	// Display multiple file upload fields
 	for( $i = 0; $i < $t_file_upload_max_num; $i++ ) {
 ?>
 		<input id="ufile[]" name="ufile[]" type="file" size="50" />
@@ -95,7 +77,7 @@ $t_max_file_size = (int)min( ini_get_number( 'upload_max_filesize' ), ini_get_nu
 </table>
 </form>
 <?php
-collapse_closed( 'upload_form' );
+	collapse_closed( 'upload_form' );
 ?>
 <table class="width100" cellspacing="1">
 <tr>
@@ -108,4 +90,4 @@ collapse_closed( 'upload_form' );
 </table>
 
 <?php
-collapse_end( 'upload_form' );
+	collapse_end( 'upload_form' );

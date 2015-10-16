@@ -1,5 +1,7 @@
 <?php
-# MantisBT - A PHP based bugtracking system
+# MantisBT - a php based bugtracking system
+
+# Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.
 
 # MantisBT is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,16 +17,10 @@
 # along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Mantis Column Handling
- * @copyright Copyright 2009  MantisBT Team - mantisbt-dev@lists.sourceforge.net
- * @link http://www.mantisbt.org
- * @package MantisBT
- * @subpackage classes
- */
-
-/**
  * Base class that implements basic column functionality
  * and integration with MantisBT.
+ * @package MantisBT
+ * @subpackage classes
  */
 abstract class MantisColumn {
 
@@ -47,29 +43,25 @@ abstract class MantisColumn {
 	/**
 	 * Build the SQL query elements 'join' and 'order' as used by
 	 * core/filter_api.php to create the filter sorting query.
-	 * @param string $p_direction Sorting order ('ASC' or 'DESC').
+	 * @param string Sorting order ('ASC' or 'DESC')
 	 * @return array Keyed-array with query elements; see developer guide
 	 */
-	public function sortquery( $p_direction ) {
-		return array();
-	}
+	public function sortquery( $p_dir ) {}
 
 	/**
 	 * Allow plugin columns to pre-cache data for all issues
 	 * that will be shown in a given view.  This is preferable to
 	 * the alternative option of querying the database for each
 	 * issue as the display() method is called.
-	 * @param array $p_bugs Bug objects.
-	 * @return void
+	 * @param array Bug objects
 	 */
-	public function cache( array $p_bugs ) {}
+	public function cache( $p_bugs ) {}
 
 	/**
 	 * Function to display column data for a given bug row.
-	 * @param BugData $p_bug            A BugData object.
-	 * @param integer $p_columns_target Column display target.
-	 * @return void
+	 * @param object Bug object
+	 * @param int Column display target
 	 */
-	abstract public function display( BugData $p_bug, $p_columns_target );
+	abstract public function display( $p_bug, $p_columns_target );
 }
 
