@@ -49,7 +49,7 @@
 var jqDeferred = $.ajax({
   type: "POST",
   dataType: "json",
-  url: "/mantis/plugin.php?page=Serials/json/customer.php"});
+  url: "/mantislive/plugin.php?page=Serials/json/customer.php"});
   jqDeferred.then( function(data) {
     /*    $.each(data,function(i,v){
             console.log(v.format);
@@ -133,7 +133,7 @@ $('#customer .typeahead').bind('typeahead:select', function(ev, suggestion) {
   
   var jqDeferred = $.ajax({
     type:"POST",
-    url: "/mantis/plugin.php?page=Serials/json/assembly.php",
+    url: "/mantislive/plugin.php?page=Serials/json/assembly.php",
     data: {"customer_id": suggestion.eg},
     dataType: 'json',
   });
@@ -203,7 +203,7 @@ $('#assembly .typeahead').bind('typeahead:select', function(ev, suggestion) {
 
   var jqDeferred = $.ajax({
     type:"POST",
-    url: "/mantis/plugin.php?page=Serials/json/revision.php",
+    url: "/mantislive/plugin.php?page=Serials/json/revision.php",
     data: {"assembly_number": suggestion.value, "customer_id": suggestion.eg},
     dataType: 'json',
   });
@@ -267,7 +267,7 @@ $('#revision .typeahead').bind('typeahead:select', function(ev, suggestion) {
   $("#result").append(myData + "<br/>");
   var jqDeferred = $.ajax({
     type:"POST",
-    url: "/mantis/plugin.php?page=Serials/json/format.php",
+    url: "/mantislive/plugin.php?page=Serials/json/format.php",
     data: {"assembly_id": suggestion.eg},
     dataType: 'json',
   });
@@ -294,6 +294,7 @@ $('#revision .typeahead').bind('typeahead:select', function(ev, suggestion) {
   
 $(document).ready(function() {
     $("#tulostaa-painike").on('click', function() {
+		console.log($("#log-wrapper").html());
       $("#printable").print({
         deferred: $.Deferred(),
         timeout: 250
@@ -303,7 +304,10 @@ $(document).ready(function() {
 		location.reload();
     });
 	$("#search").on({
-		click: function(){
+		// $(#log-wrapper).val();
+		// $(#log-wrapper).text();
+		// $(#log-wrapper).html(); 		
+		click: function(){		
 		var postdata ={
 			sales_order: $('input[name="sales_order"]').val(),
 			scan_input: $('input[name="scan_input"]').val(),
@@ -312,21 +316,22 @@ $(document).ready(function() {
 			assembly_number: $('input[name="assembly"]').val(),
 		};
 		 console.log($('input[name="sales_order"]').val());
+		 console.log($('input[name="assembly"]').val());
 		// console.log(q);
 		$.ajax({
 			type:'POST',
-			url: '/mantis/plugin.php?page=Serials/search.php',
+			url: '/mantislive/plugin.php?page=Serials/search.php',
 			data: postdata,
 			//contentType: "application/json",
 			// dataType: 'json'
 		}).done(function(data){
 			$("#log-wrapper").empty().append( data + "<br/>")
                                             .addClass("bg-success")
-                                            .css({  "max-height":"300px",
-                                                    "overflow-y" : "auto" })
+                                            .css({"overflow-y" : "auto" })
                         .animate({"scrollTop": $("#log-wrapper")[0].scrollHeight}, "slow");
+			console.log($("#log-wrapper").html());			
 		});
-		}	
+		}		
 	});
     $("#scan_result").on({
         mouseenter: function(){
@@ -369,7 +374,7 @@ $(document).ready(function() {
                     // console.log(q);
                     $.ajax({
                         type:'POST',
-                        url: '/mantis/plugin.php?page=Serials/scan_proc.php',
+                        url: '/mantislive/plugin.php?page=Serials/scan_proc.php',
                         data: postdata,
                         //contentType: "application/json",
                         // dataType: 'json'
@@ -377,7 +382,9 @@ $(document).ready(function() {
                         if (data.indexOf('ERROR')>-1){
                             $("#virhe") .removeClass("alert-success")
                                         .addClass("alert-danger");
-                            $("#virhe").empty().append("Attention: " + data);
+                            $("#virhe").empty().append("Attention: " + data)
+										.css({  "max-height":"300px",
+                                                    "overflow-y" : "auto" });
                         } else {
                         $("#virhe") .removeClass("alert-danger")
                                     .addClass("alert-success");
@@ -389,7 +396,7 @@ $(document).ready(function() {
                                             .addClass("bg-success")
                                             .css({  "max-height":"300px",
                                                     "overflow-y" : "auto" })
-                        .animate({"scrollTop": $("#log-wrapper")[0].scrollHeight}, "slow");
+                        .animate({"scrollTop": $("#log-wrapper")[0].scrollHeight}, "slow");							
                         }
                     }).fail(function(jqXHR,textStatus, errorThrown){
                         $("#virhe") .removeClass("alert-success")
@@ -404,12 +411,7 @@ $(document).ready(function() {
                     $("#virhe_kuvaus").show();
                     setTimeout(function () { $("#virhe_kuvaus").removeClass("alert-info").hide(); }, 2000 );
                     break;
-                case 9:
-                    $("#virhe_kuvaus")  .addClass("alert-info")
-                                        .empty().append(' input saved with {Tab} key ! ');
-                    $("#virhe_kuvaus").show();
-                    setTimeout(function () { $("#virhe_kuvaus").removeClass("alert-info").hide(); }, 2000 );
-                    break;
+
             }
         }
     });

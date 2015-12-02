@@ -2,11 +2,6 @@
 require( "serials_api.php" );
 access_ensure_project_level( plugin_config_get('format_threshold')); 
 
-
-
-
-	access_ensure_project_level( DEVELOPER );
-
 	$f_user_id = auth_get_current_user_id();
 	$f_customer_name	= gpc_get_string('customer_name');
 	$f_assembly_number	  = gpc_get_string( 'assembly_number' );

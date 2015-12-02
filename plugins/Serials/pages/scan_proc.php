@@ -8,7 +8,7 @@
 	$g_mantis_serials_format         = plugin_table('format');
 	$g_mantis_serials_serial         = plugin_table('serial');
     if(isset($_POST['new_scan']))
-		if($_POST['assembly_id']=="" or $_POST['customer_id'] == "" or $_POST['sales_order']=="" or $_POST['revision']==""){
+		if($_POST['assembly_id']=="" or $_POST['customer_id'] == "" or $_POST['sales_order']=="" or $_POST['revision']=="" or $_POST['new_scan'==""]){
 			echo "ERROR - Please complete the selection field in RED TEXT";
 		}
 			else
@@ -28,25 +28,44 @@
             $query = "SELECT * FROM $g_mantis_serials_serial WHERE serial_scan='$t_new_scan' AND assembly_id='$t_assembly_id'";
             $result = mysql_query($query) or die(mysql_error());	
             if( mysql_num_rows( $result ) > 0 ) {
-				echo '<div > Duplication ERROR - Scan Data Shown Below! <table class="table table-bordered table-condensed table-striped">';
-				$first_row = true;
-				while ( $row = mysql_fetch_assoc( $result )) {
-					if ($first_row) {
-						$first_row = false;
-						// Output header row from keys.
-						echo '<tr>';
-						foreach($row as $key => $field) {
-							echo '<th class="text-center text-uppercase">' . htmlspecialchars($key) . '</th>';
+				echo 'Duplication ERROR - Scan Data Shown Below! <table class="col-md-12 table table-bordered table-condensed table-striped">';
+				$where_search .= $g_mantis_serials_serial . ".serial_scan = " . '"' . $t_new_scan . '"' ;	
+				$query = "SELECT 
+							$g_mantis_serials_customer.customer_name,
+							$g_mantis_serials_assembly.assembly_number, 
+							$g_mantis_serials_assembly.revision,
+							$g_mantis_serials_serial.sales_order,
+							mantis_user_table.realname,
+							$g_mantis_serials_serial.date_posted,
+							$g_mantis_serials_serial.serial_scan
+							FROM $g_mantis_serials_serial
+							INNER JOIN $g_mantis_serials_assembly ON $g_mantis_serials_serial.assembly_id = $g_mantis_serials_assembly.assembly_id
+							INNER JOIN $g_mantis_serials_customer ON $g_mantis_serials_serial.customer_id = $g_mantis_serials_customer.customer_id
+							INNER JOIN mantis_user_table ON mantis_user_table.id = $g_mantis_serials_serial.user_id
+							WHERE $where_search
+							ORDER BY serial_scan, date_posted
+							";
+				$result = mysql_query($query) or die(mysql_error());	
+				if( mysql_num_rows( $result ) > 0 ) {
+					$first_row = true;
+					while ( $row = mysql_fetch_assoc( $result )) {
+						if ($first_row) {
+							$first_row = false;
+							// Output header row from keys.
+							echo '<tr >';
+							foreach($row as $key => $field) {
+								echo '<th class="text-center text-uppercase col-md-2">' . htmlspecialchars($key) . '</th>';
+							}
+							echo '</tr>';
 						}
-						echo '</tr>';
+						echo '<tr >';
+						foreach($row as $field) {
+							echo '<td class="text-center col-md-2">' . htmlspecialchars($field) . '</td>';
+						}
+						echo '</tr>' ;
 					}
-					echo '<tr>';
-					foreach($row as $field) {
-						echo '<td class="text-center">' . htmlspecialchars($field) . '</td>';
-					}
-					echo '</tr>' ;
+					echo '</table>';
 				}
-				echo '</table></div>';
 			}	
             else {
                 $query = sprintf("INSERT INTO $g_mantis_serials_serial " .

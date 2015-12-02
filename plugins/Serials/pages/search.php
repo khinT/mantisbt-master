@@ -16,7 +16,7 @@
 			$cat_count = array(
 				0=>$_POST['scan_input'],
 				1=>$_POST['sales_order'],
-				2=>$_POST['assembly'],
+				2=>$_POST['assembly_number'],
 				3=>$_POST['assembly_id'],
 				4=>$_POST['customer_id'],
 				);
@@ -24,56 +24,58 @@
             global $g_mantis_serials_serial;
 			$t_scan_input         = $_POST['scan_input'];
             $t_sales_order    	= $_POST['sales_order'];
-			$t_assembly_number    = $_POST['assembly'];
+			$t_assembly_number    = $_POST['assembly_number'];
             $t_assembly_id      = $_POST['assembly_id'];
             $t_customer_id      = $_POST['customer_id'];
             $t_user_id 			= auth_get_current_user_id();
 			if($t_sales_order!=""){
-				$where_search .= "mantis_plugin_serials_serial_table.sales_order = " . $t_sales_order;
+				$where_search .= $g_mantis_serials_serial . ".sales_order = " . '"' . $t_sales_order . '"';
 				$andcount = $andcount - 1;
 				if ($andcount > 0){
 					$where_search .= " AND ";
 				}
 			}
 			if($t_scan_input!=""){
-				$where_search .= "mantis_plugin_serials_serial_table.serial_scan = " . $t_scan_input;
+				$where_search .= $g_mantis_serials_serial . ".serial_scan = " . '"' . $t_scan_input . '"' ;
 				$andcount = $andcount - 1;
 				if ($andcount > 0){
 					$where_search .=" AND ";
 				}
 			}
 			if($t_customer_id!=""){
-				$where_search .="mantis_plugin_serials_serial_table.customer_id = " . $t_customer_id;
+				$where_search .=$g_mantis_serials_serial . ".customer_id = " . '"' . $t_customer_id . '"' ;
 				$andcount = $andcount - 1;
 				if ($andcount > 0){
 					$where_search .=" AND ";
 				}
 			}
-			if($assembly_number!=""){
-				$where_search .="mantis_plugin_serials_assembly_table.assembly_number = " . $t_assembly_number;
+			if($t_assembly_number!=""){
+				$where_search .=$g_mantis_serials_assembly . ".assembly_number = " . '"' . $t_assembly_number . '"' ;
 				$andcount = $andcount - 1;
 				if ($andcount > 0){
 					$where_search .=" AND ";
 				}
 			}
 			if($t_assembly_id!=""){
-				$where_search .="mantis_plugin_serials_serial_table.assembly_id = " . $t_assembly_id;
+				$where_search .=$g_mantis_serials_serial . ".assembly_id = " . '"' . $t_assembly_id . '"' ;
 				$andcount = $andcount - 1;
 				if ($andcount > 0){
 					$where_search .=" AND ";
 				}
 			}
+			
             $query = "SELECT 
-						mantis_plugin_serials_customer_table.customer_name,
-						mantis_plugin_serials_assembly_table.assembly_number, 
-						mantis_plugin_serials_assembly_table.revision,
+						$g_mantis_serials_customer.customer_name,
+						$g_mantis_serials_assembly.assembly_number, 
+						$g_mantis_serials_assembly.revision,
+						$g_mantis_serials_serial.sales_order,
 						mantis_user_table.realname,
-						mantis_plugin_serials_serial_table.date_posted,
-						mantis_plugin_serials_serial_table.serial_scan
+						$g_mantis_serials_serial.date_posted,
+						$g_mantis_serials_serial.serial_scan
 						FROM $g_mantis_serials_serial
-						INNER JOIN $g_mantis_serials_assembly ON mantis_plugin_serials_serial_table.assembly_id = mantis_plugin_serials_assembly_table.assembly_id
-						INNER JOIN $g_mantis_serials_customer ON mantis_plugin_serials_serial_table.customer_id = mantis_plugin_serials_customer_table.customer_id
-						INNER JOIN mantis_user_table ON mantis_user_table.id = mantis_plugin_serials_serial_table.user_id
+						INNER JOIN $g_mantis_serials_assembly ON $g_mantis_serials_serial.assembly_id = $g_mantis_serials_assembly.assembly_id
+						INNER JOIN $g_mantis_serials_customer ON $g_mantis_serials_serial.customer_id = $g_mantis_serials_customer.customer_id
+						INNER JOIN mantis_user_table ON mantis_user_table.id = $g_mantis_serials_serial.user_id
 						WHERE $where_search
 						ORDER BY serial_scan, date_posted
 						";
