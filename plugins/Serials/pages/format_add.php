@@ -1,128 +1,42 @@
 <?php
-# MantisBT - a php based bugtracking system
-
-# MantisBT is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 2 of the License, or
-# (at your option) any later version.
-#
-# MantisBT is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with MantisBT.  If not, see <http://www.gnu.org/licenses/>.
-
-	/**
-	 * This page updates a user's information
-	 * If an account is protected then changes are forbidden
-	 * The page gets redirected back to account_page.php
-	 *
-	 * @package MantisBT
-	 * @copyright Copyright (C) 2000 - 2002  Kenzaburo Ito - kenito@300baud.org
-	 * @copyright Copyright (C) 2002 - 2014  MantisBT Team - mantisbt-dev@lists.sourceforge.net
-	 * @link http://www.mantisbt.org
-	 */
-	 /**
-	  * MantisBT Core API's
-	  */
-
-	auth_ensure_user_authenticated();
-	
-	// get the user id once, so that if we decide in the future to enable this for
-	// admins / managers to change details of other users.
-	$t_user_id = auth_get_current_user_id();
-
-	$t_redirect = plugin_page('config.php');
+require( "serials_api.php" );
+access_ensure_project_level( plugin_config_get('format_threshold')); 
 
 
 
-	# Update email (but only if LDAP isn't being used)
-	if ( !( $t_ldap && config_get( 'use_ldap_email' ) ) ) {
-		$f_email = email_append_domain( $f_email );
-		email_ensure_valid( $f_email );
-		email_ensure_not_disposable( $f_email );
 
-		if ( $f_email != user_get_email( $t_user_id ) ) {
-			user_set_email( $t_user_id, $f_email );
-			$t_email_updated = true;
-		}
+	access_ensure_project_level( DEVELOPER );
+
+	$f_user_id = auth_get_current_user_id();
+	$f_customer_name	= gpc_get_string('customer_name');
+	$f_assembly_number	  = gpc_get_string( 'assembly_number' );
+	$f_revision	  = gpc_get_string( 'revision' );
+	$f_format = gpc_get_string( 'format' );
+	$f_format_example = gpc_get_string( 'format_example' );
+
+	$new_customer = customer_name_unique ( $f_customer_name );
+	$new_assembly = assembly_revision_unique ( $f_assembly_number, $f_revision ,$new_customer );
+?>
+<?php
+	if ( $new_customer == 'true' || $new_assembly == 'true' ){
+		$result = add_format ( $f_customer_name, $f_assembly_number, $f_revision, $f_format, $f_format_example, $new_customer, $new_assembly );
+		$form_msg = plugin_lang_get( 'new_format' );
+	} else {					# FAILURE
+		$result = add_format ( $f_customer_name, $f_assembly_number, $f_revision, $f_format, $f_format_example, $new_customer, $new_assembly );
+		$form_msg = plugin_lang_get( 'update_format' );
 	}
-
-	# Update real name (but only if LDAP isn't being used)
-	if ( !( $t_ldap && config_get( 'use_ldap_realname' ) ) ) {
-		# strip extra spaces from real name
-		$t_realname = string_normalize( $f_realname );
-		if ( $t_realname != user_get_field( $t_user_id, 'realname' ) ) {
-			# checks for problems with realnames
-			user_ensure_realname_valid( $t_realname );
-			$t_username = user_get_field( $t_user_id, 'username' );
-			user_ensure_realname_unique( $t_username, $t_realname );
-			user_set_realname( $t_user_id, $t_realname );
-			$t_realname_updated = true;
-		}
-	}
-
-	# Update password if the two match and are not empty
-	if ( !is_blank( $f_password ) ) {
-		if ( $f_password != $f_password_confirm ) {
-			trigger_error( ERROR_USER_CREATE_PASSWORD_MISMATCH, ERROR );
-		} else {
-			if ( !auth_does_password_match( $t_user_id, $f_password ) ) {
-				user_set_password( $t_user_id, $f_password );
-				$t_password_updated = true;
-			}
-		}
-	}
-
-	# avatar
-	$t_username = user_get_field( $t_user_id, 'username' );
-	# store use_avatar in config
-	config_set('use_gravatar', $f_use_gravatar, $t_user_id, ALL_PROJECTS);
-
-	# upload avatar
-	$target_path = config_get('directory_avatar') . '/';
-	$avatar_file_name = $_FILES['avatar_file']['name'];
-	$ext = end(explode('.', $_FILES['avatar_file']['name'])); 
-	$target_file = $target_path . $t_username . '.' . $ext; 
-	move_uploaded_file($_FILES['avatar_file']['tmp_name'], $target_file);
-
-	# delete avatar
-	$f_delete_avatar	= gpc_get_string( 'delete_avatar', '' );
-	if ($f_delete_avatar != '') {
-		$avatar_file = $target_path . '/' . $t_username . '.gif';
-		$fh = fopen($avatar_file, 'w') or die("can't open file");
-		fclose($fh);
-		
-		unlink($avatar_file);
-
-		$avatar_file = $target_path . '/' . $t_username . '.jpg';
-		$fh = fopen($avatar_file, 'w') or die("can't open file");
-		fclose($fh);
-
-		unlink($avatar_file);
-	}
-	
-	form_security_purge('account_update');
-
-	html_page_top( null, $t_redirect );
-
-	echo '<br /><div align="center">';
-
-	if ( $t_email_updated ) {
-		echo lang_get( 'email_updated' ) . '<br />';
-	}
-
-	if ( $t_password_updated ) {
-		echo lang_get( 'password_updated' ) . '<br />';
-	}
-
-	if ( $t_realname_updated ) {
-		echo lang_get( 'realname_updated' ) . '<br />';
-	}
-
+?>
+<div align="center">
+<?php
+	$t_redirect_url = 'plugin.php?page=Serials/format.php';
+	html_page_top( null, $t_redirect_url );
+	echo '<br />';
+	echo $form_msg;
+	echo '<br />';
 	echo lang_get( 'operation_successful' ) . '<br />';
-	print_bracket_link( $t_redirect, lang_get( 'proceed' ) );
-	echo '</div>';
+	print_bracket_link( $t_redirect_url, lang_get( 'proceed' ) );
+?>
+</div>
+<?php
+		
 	html_page_bottom();

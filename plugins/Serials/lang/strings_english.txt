@@ -12,7 +12,8 @@ $s_plugin_Serials_sales_order = "Sales Order Number";
 $s_plugin_Serials_scan_title = "Please Scan the BarCode.";
 $s_plugin_Serials_scan_list = "Serial Scan List View";
 $s_plugin_Serials_print = "Print Serial list";
-
+$s_plugin_Serials_new_format = "New Serial Format Has Been Added.";
+$s_plugin_Serials_update_format = "Existing Serial Format Has Been Updated.";
 $s_plugin_Serials_error_duplication = "The Serial Number you have scanned is a Duplicate of the entry Below!";
 $s_plugin_Serials_error_incorrect_format = "The Serial Number you have scanned does not contain the correct Format!";
 

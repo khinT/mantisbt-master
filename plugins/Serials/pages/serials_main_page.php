@@ -1,53 +1,96 @@
 <?php
 require( "serials_api.php" );
-require( "css_serials.php" );
 access_ensure_global_level( plugin_config_get( 'serials_view_threshold' ) );
 html_page_top1();
 html_page_top2();
-$minimum_level = access_get_global_level();
-$t_where_clausole = "view_access <= $minimum_level";
-
 ?>
+<script>
+  function preventBack(){window.history.forward();
+  setTimeout("preventBack()", 0);
+  window.onunload=function(){null};
+}
+</script>
+<script type="text/javascript" src="plugins/Serials/pages/jquery/jquery-1.11.3.min.js"></script>
+<script src="plugins/Serials/pages/typeahead/typeahead.bundle.js"></script>
+<script src="plugins/Serials/pages/handlebars/handlebars-v4.0.4.js"></script>
+<link rel="stylesheet" href="plugins/Serials/pages/typeahead/typeahead.css">
+<link rel="stylesheet" href="plugins/Serials/pages/bootstrap/css/bootstrap.css">
 <div>
 <?php
-if ( access_has_project_level( DEVELOPER ) ) {
+if ( access_has_project_level( plugin_config_get('format_threshold') ) ) {
     global $g_config_page;
     print_bracket_link( $g_format_page, plugin_lang_get( 'format_title') );
 }
 ?>
-<table width="100%">
-	<tr <?php echo helper_alternate_class() ?> valign="top">
-		<td class="category">customer:</td>
-		<td class="category">sales order:<input></td>
-		<td class="category">search button</td>
-	</tr>
-	<tr <?php echo helper_alternate_class() ?> valign="top">
-		<td class="category">Assembly Number:<select></td>
-		<td class="category">Revision:<select></td>
-		<td class="category">Print Button</td>
-	</tr>
-</table>
 </div>
-<div>
-	<table>
-	<tr>
-		<td>Scanned List</td>
-	</tr>
-	<tr>
-		<td><textarea rows="10" cols="100"></textarea></td>
-	</tr>		
-	</table>	
-</div>
-<div>
-<table>
-	<tr>
-		<td>Error handling</td>
-	</tr>
-	<tr>
-		<td>Scan:<input size="100"></td>
-	</tr>
-</table>	
-</div>		
+<section id="myData"></section>
+	<script type="text/template" id="url-template">
+	<form >
+		<table>
+			<tr>
+		<div class="container col-sm-12">
+		<div id="top-function-wrapper" class="col-sm-3">
+		</br>
+		<?php
+		if ( access_has_project_level( plugin_config_get('search_threshold') ) ) {
+			echo '<button type="button" id="search" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>{{bold searchbtn}}</button>';
+		}
+		?>
+			<button type="button" id="tulostaa-painike" class="btn btn-primary print" ><span class="glyphicon glyphicon-print"></span>
+				{{{bold printbtn}}}</button>
+			<button type="button" id="reset" class="btn btn-secondary reset"><span class="glyphicon glyphicon-refresh" ></span>
+				{{{bold resetbtn}}}</button>
+		</div>		
+		<div class="container col-sm-9 pull-right">
+		<div id="sales_order" class="input-group pull-left col-sm-4">
+			{{bold sales_order}} {{required}}:</br> 
+				<input  class="typeahead" name="sales_order" id="sales_order">
+		</div>
+
+		<div id="customer" class="input-group pull-left col-sm-4">
+		{{bold customer}} {{required}}:</br>
+				<input class="typeahead" type="text" name="customer" id="customer">
+		</div>
+
+		<div id="assembly"  class="input-group pull-left col-sm-4">
+			{{bold assembly}} {{required}}:</br>
+				<input class="typeahead" type="text" name="assembly" id="assembly">
+		</div>
+
+		<div id="revision"  class="input-group pull-left col-sm-4">
+			{{bold revision}} {{required}}:</br>
+				<input class="typeahead" type="text" name="revision" id="revision">
+		</div>
+		</div>
+		</tr>
+		<tr>
+		<div id="log-wrapper" class="col-offset-1 col-md-12 right-scroll "></div>
+		</div>
+		</tr>
+		<div class="container col-sm-12 no-print">
+		<div class="row no-print">
+			<div id="scan_input" class="input-group input-group-lg col-sm-12 col-centered">
+			  <span class="input-group-addon" id="sizing-addon1">Scan Input</span>
+			  <input type="text" id="scan_result" name="scan_input" class="form-control" placeholder={{{lang_013}}} aria-describedby="sizing-addon1">
+			</div>
+		</div>{{! /row }}
+		<input type="hidden" name="format" id="format">
+		<input type="hidden" name="format_id" id="format_id">
+		<input type="hidden" name="assembly_id" id="assembly_id">
+		<input type="hidden" name="customer_id" id="customer_id">
+		<input type="hidden" name="list_count" id="list_count">		
+		<div class="hidden no-print" id="result"></div>
+		<div id="konsoli_loki">
+			<div id="virhe" class="alert"></div>
+			<div id="virhe_kuvaus" class="alert"></div>
+		</div>
+		</div>
+	</form>
+	</script>
+<script src="plugins/Serials/pages/js/front.js" type="text/javascript"></script>
+<script src="plugins/Serials/pages/bootstrap/plugins/jQuery-Plugin-Js/jQuery.print.js"></script>
+
 <?php
+
 html_page_bottom1();
 ?>
