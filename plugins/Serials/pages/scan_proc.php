@@ -78,11 +78,11 @@
 								$t_new_scan,
 								$t_sales_order);
 		        $result = mysql_query($query) or die(mysql_error());
-				echo "<td class=\"col-md-6\">" . $t_count . ". " . $t_new_scan . "</td>";
-
-            }
+				echo '<div class="col-md-4"><b>' . $t_count . '.</b> ' . $t_new_scan . '</div>';
+				}
+            
         }
-        else echo "ERROR 20 - Format is incorrect </br>Please verify with the following example :" . $_POST['format_example'];
+        else echo "ERROR 20 - Format is incorrect </br><b>Please verify with the following example : " . $_POST['format_example'] . "</b>";
     }
         // echo json_encode($qr, JSON_FORCE_OBJECT);
         // echo json_encode($qr, JSON_PRETTY_PRINT);

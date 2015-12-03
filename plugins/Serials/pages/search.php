@@ -82,7 +82,7 @@
             $result = mysql_query($query) or die(mysql_error());	
             if( mysql_num_rows( $result ) > 0 ) {
 				$first_row = true;
-				echo '<table class="col-md-12"><div>';
+				echo '<table class="col-md-12 table table-bordered table-condensed table-striped">';
 				while ( $row = mysql_fetch_assoc( $result )) {
 					if ($first_row) {
 						$first_row = false;
@@ -99,7 +99,7 @@
 					}
 					echo '</tr>' ;
 				}
-				echo '</table></div>';
+				echo '</table>';
 			}	
             else {
 				echo "Search for Sales Order " . $t_sales_order . "  returned with no results." ;

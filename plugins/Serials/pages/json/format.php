@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 	function get_format ($p_assembly_id){
 		$t_assembly_id = $p_assembly_id;
 		global $g_mantis_serials_format; 
-		$query = "SELECT format, format_id
+		$query = "SELECT format, format_id, format_example
 				FROM $g_mantis_serials_format
 				WHERE assembly_id='$t_assembly_id'";
 				
@@ -20,6 +20,7 @@ header('Content-Type: application/json');
 		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 			$row_array['format'] = $row['format'];
 			$row_array['format_id'] = $row['format_id'];
+			$row_array['format_example'] = $row['format_example'];
 						
 			//push the values in the array
 			array_push($json_response,$row_array);

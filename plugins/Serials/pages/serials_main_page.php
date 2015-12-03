@@ -9,6 +9,19 @@ html_page_top2();
   setTimeout("preventBack()", 0);
   window.onunload=function(){null};
 }
+  function printDiv() {
+     var printContents = "<Style>.col-md-4{float:left;min-width:170px;max-width:365px;margin-left:5px;margin-right:5px}</style><table><tr style=\"align:center; width:800px\"><th style=\"min-width:25%; align:center\">Sales Order: </br>" + $('input[name="sales_order"]').val()+"</th><th style=\"min-width:25%; align:center\">Customer: </br>" + $('input[name="customer"]').val()+"</th><th style=\"min-width:25%; align:center\">Assembly Number: </br>" + $('input[name="assembly"]').val()+"</th><th style=\"min-width:25%; align:center\">Revision: </br>" + $('input[name="revision"]').val() +"</th></tr></table><div style=\"max-width:22cm\">" + $("#log-wrapper").html() + "</div>";
+     var originalContents = document.body.innerHTML;
+
+     document.body.innerHTML = printContents;
+
+     window.print();
+
+     document.body.innerHTML = originalContents;
+}
+  function reload(){
+	  location.reload();
+}	
 </script>
 <script type="text/javascript" src="plugins/Serials/pages/jquery/jquery-1.11.3.min.js"></script>
 <script src="plugins/Serials/pages/typeahead/typeahead.bundle.js"></script>
@@ -36,12 +49,12 @@ if ( access_has_project_level( plugin_config_get('format_threshold') ) ) {
 			echo '<button type="button" id="search" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>{{bold searchbtn}}</button>';
 		}
 		?>
-			<button type="button" id="tulostaa-painike" class="btn btn-primary print" ><span class="glyphicon glyphicon-print"></span>
+			<button type="button" id="tulostaa-painike" class="btn btn-primary print" onclick="printDiv()"><span class="glyphicon glyphicon-print"></span>
 				{{{bold printbtn}}}</button>
-			<button type="button" id="reset" class="btn btn-secondary reset"><span class="glyphicon glyphicon-refresh" ></span>
+			<button type="button" id="reset" class="btn btn-secondary reset" onclick="reload()"><span class="glyphicon glyphicon-refresh" ></span>
 				{{{bold resetbtn}}}</button>
 		</div>		
-		<div class="container col-sm-9 pull-right">
+		<div id="info" class="container col-sm-9 pull-right">
 		<div id="sales_order" class="input-group pull-left col-sm-4">
 			{{bold sales_order}} {{required}}:</br> 
 				<input  class="typeahead" name="sales_order" id="sales_order">
@@ -76,6 +89,7 @@ if ( access_has_project_level( plugin_config_get('format_threshold') ) ) {
 		</div>{{! /row }}
 		<input type="hidden" name="format" id="format">
 		<input type="hidden" name="format_id" id="format_id">
+		<input type="hidden" name="format_example" id="format_example">
 		<input type="hidden" name="assembly_id" id="assembly_id">
 		<input type="hidden" name="customer_id" id="customer_id">
 		<input type="hidden" name="list_count" id="list_count">		

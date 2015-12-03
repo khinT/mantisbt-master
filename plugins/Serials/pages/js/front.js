@@ -276,8 +276,7 @@ $('#revision .typeahead').bind('typeahead:select', function(ev, suggestion) {
 	  console.log(obj.format, obj.format_id);
 	  $('input[name="format"]').val(obj.format);
 	  $('input[name="format_id"]').val(obj.format_id);
-	  $('#format .typeahead').prop( "disabled", true );
-	  $('#format_id .typeahead').prop( "disabled", true );
+	  $('input[name="format_example"]').val(obj.format_example);
 	}); 
   })
   .fail(function(jqXHR, textStatus, errorThrown){
@@ -293,16 +292,15 @@ $('#revision .typeahead').bind('typeahead:select', function(ev, suggestion) {
   $( this ).find( 'input:hidden' ).val(foo); */
   
 $(document).ready(function() {
-    $("#tulostaa-painike").on('click', function() {
-		console.log($("#log-wrapper").html());
+/*     $("#tulostaa-painike").on('click', function() {
       $("#printable").print({
         deferred: $.Deferred(),
         timeout: 250
       });
-    });
-	$("#reset").on('click', function() {
+    }); */
+/* 	$("#reset").on('click', function() {
 		location.reload();
-    });
+    }); */
 	$("#search").on({
 		// $(#log-wrapper).val();
 		// $(#log-wrapper).text();
@@ -329,7 +327,7 @@ $(document).ready(function() {
                                             .addClass("bg-success")
                                             .css({"overflow-y" : "auto" })
                         .animate({"scrollTop": $("#log-wrapper")[0].scrollHeight}, "slow");
-			console.log($("#log-wrapper").html());			
+			//console.log($("#log-wrapper").html());			
 		});
 		}		
 	});
@@ -357,16 +355,13 @@ $(document).ready(function() {
 			
             switch (e.which) {
                 case 13:
-                    $("#virhe_kuvaus")  .addClass("alert-info")
-                                        .empty().append(' input saved with {Enter} key ! ');
-                    $("#virhe_kuvaus").show(); // ajax to scan_proc.php
-                    setTimeout(function () { $("#virhe_kuvaus").removeClass("alert-info").hide(); }, 2000 );
                     var postdata ={
 						new_scan: $(this).val(),
 						customer_id: $('input[name="customer_id"]').val(),
 						assembly_id: $('input[name="assembly_id"]').val(),
 						sales_order: $('input[name="sales_order"]').val(),
 						format: $('input[name="format"]').val(),
+						format_example: $('input[name="format_example"]').val(),
 						list_count: $('input[name="list_count"]').val(),
 						revision: $('input[name="revision"]').val(),
 					};
@@ -392,7 +387,7 @@ $(document).ready(function() {
 						$('input[name="list_count"]').val(newcount);
 						document.getElementById('scan_result').select();
                         $("#virhe").empty().append("last scan: " + data);
-                        $("#log-wrapper")  .append( data + "<br/>")
+                        $("#log-wrapper")  .append( data )
                                             .addClass("bg-success")
                                             .css({  "max-height":"300px",
                                                     "overflow-y" : "auto" })
@@ -404,12 +399,6 @@ $(document).ready(function() {
                                     .empty().append('!ERROR: ' + textStatus + ", " + errorThrown);
                         console.log('ERROR', textStatus, errorThrown);
                     });
-                    break;
-                case 1:
-                    $("#virhe_kuvaus")  .addClass("alert-info")
-                                        .empty().append(' input saved with {left-clicked} key ! ');
-                    $("#virhe_kuvaus").show();
-                    setTimeout(function () { $("#virhe_kuvaus").removeClass("alert-info").hide(); }, 2000 );
                     break;
 
             }
