@@ -62,13 +62,44 @@
 	// Display multiple file upload fields
 	for( $i = 0; $i < $t_file_upload_max_num; $i++ ) {
 ?>
-		<input id="ufile[]" name="ufile[]" type="file" size="50" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script>
+function updateSize() {
+  var nBytes = 0,
+      oFiles = document.getElementById("uploadInput").files,
+      nFiles = oFiles.length;
+  for (var nFileId = 0; nFileId < nFiles; nFileId++) {
+    nBytes += oFiles[nFileId].size;
+  }
+  var sOutput = nBytes + " bytes";
+  // optional code for multiples approximation
+  for (var aMultiples = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"], nMultiple = 0, nApprox = nBytes / 1024; nApprox > 1; nApprox /= 1024, nMultiple++) {
+    sOutput = nApprox.toFixed(3) + " " + aMultiples[nMultiple] + " (" + nBytes + " bytes)";
+  }
+  // end of optional code
+
+  if( nBytes > 5000000 )
+  {
+	  alert("The file you have selected is larger than the allowed 5mb limit.  Please select a file of the appropriate size.");
+	  document.getElementById("uploadInput").value = "";
+	  document.getElementById("fileSize").innerHTML = "0";  
+  }
+  else
+  {
+	  document.getElementById("fileNum").innerHTML = nFiles;
+	  document.getElementById("fileSize").innerHTML = sOutput;  
+  }
+};
+</script>
+		<input id="uploadInput" type="file" name="ufile[]" onchange="updateSize();" multiple> selected files: <span id="fileNum">0</span>; total size: <span id="fileSize">0</span>
+
 <?php
 		if( $t_file_upload_max_num > 1 ) {
 			echo '<br />';
 		}
 	}
 ?>
+
 		<input type="submit" class="button"
 			value="<?php echo lang_get( $t_file_upload_max_num == 1 ? 'upload_file_button' : 'upload_files_button' ) ?>"
 		/>

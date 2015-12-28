@@ -15,7 +15,7 @@ class SerialsPlugin extends MantisPlugin {
     return array(
 		'format_text' => ON,
 		'search_text' => ON,
-		'search_threshold' => 55,
+		'search_threshold' => 10,
 		'serials_view_threshold' => 10,
 		'format_threshold'       => 55,
 		'manage_threshold'	=>ADMINISTRATOR

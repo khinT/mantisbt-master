@@ -106,6 +106,7 @@
 			print_header_redirect( 'login_select_proj_page.php?ref=bug_report_page.php' );
 		}
 
+
 		access_ensure_project_level( config_get( 'report_bug_threshold' ) );
 
 		$f_build				= gpc_get_string( 'build', '' );
@@ -158,6 +159,7 @@
 	$tpl_show_status = in_array('status', $t_fields);
 
 	$tpl_show_monitor_box = !$tpl_force_readonly;
+
 #	$tpl_show_versions = version_should_show_product_version( $t_project_id );
 #	$tpl_show_product_version = $tpl_show_versions && in_array( 'product_version', $t_fields );
 #	$tpl_show_product_build = $tpl_show_versions && in_array( 'product_build', $t_fields ) && config_get( 'enable_product_build' ) == ON;
@@ -269,6 +271,28 @@
 	</tr>
 <?php
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	if ( $tpl_show_due_date ) {
 		$t_date_to_display = '';
 
@@ -443,6 +467,7 @@
 		<?php } ?>
 	</tr>
 <?php } ?>
+
 <?php if ( $tpl_show_status ) { ?>
 	<tr <?php echo helper_alternate_class() ?>>
 		<td class="category">
@@ -531,6 +556,7 @@
 			<textarea <?php echo helper_get_tab_index() ?> name="additional_info" cols="80" rows="10"><?php echo string_textarea( $f_additional_info ) ?></textarea>
 		</td>
 	</tr>
+
 <?php
 	}
 ?>
@@ -552,7 +578,37 @@
 		// Display multiple file upload fields
 		for( $i = 0; $i < $t_file_upload_max_num; $i++ ) {
 ?>
-			<input <?php echo helper_get_tab_index() ?> id="ufile[]" name="ufile[]" type="file" size="50" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script>
+function updateSize() {
+  var nBytes = 0,
+      oFiles = document.getElementById("uploadInput").files,
+      nFiles = oFiles.length;
+  for (var nFileId = 0; nFileId < nFiles; nFileId++) {
+    nBytes += oFiles[nFileId].size;
+  }
+  var sOutput = nBytes + " bytes";
+  // optional code for multiples approximation
+  for (var aMultiples = ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"], nMultiple = 0, nApprox = nBytes / 1024; nApprox > 1; nApprox /= 1024, nMultiple++) {
+    sOutput = nApprox.toFixed(3) + " " + aMultiples[nMultiple] + " (" + nBytes + " bytes)";
+  }
+  // end of optional code
+
+  if( nBytes > 5000000 )
+  {
+	  alert("The file you have selected is larger than the allowed 5mb limit.  Please select a file of the appropriate size.");
+	  document.getElementById("uploadInput").value = "";
+	  document.getElementById("fileSize").innerHTML = "0";  
+  }
+  else
+  {
+	  document.getElementById("fileNum").innerHTML = nFiles;
+	  document.getElementById("fileSize").innerHTML = sOutput;  
+  }
+};
+</script>
+		<input id="uploadInput" type="file" name="ufile[]" onchange="updateSize();" multiple> selected files: <span id="fileNum">0</span>; total size: <span id="fileSize">0</span>
+
 <?php
 			if( $t_file_upload_max_num > 1 ) {
 				echo '<br />';
@@ -562,6 +618,7 @@
 ?>
 		</td>
 	</tr>
+
 
 
 <?php
